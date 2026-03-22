@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: sans-serif; display: flex; gap: 20px; padding: 20px; }
+        .box { border: 2px solid #ccc; padding: 15px; width: 300px; border-radius: 8px; }
+        .red { border-color: #ff4d4d; } 
+        .green { border-color: #2ecc71; } 
+        #data-screen { background: #eee; padding: 10px; margin-top: 10px; min-height: 50px; }
+    </style>
+</head>
+<body>
+
+    <div class="box red">
+        <h3>1. IDOR Saldırısı</h3>
+        <p>Giriş Yapan: <b>User 101</b></p>
+        
+        <div id="data-screen">
+            <b>Profil ID:</b> <span id="pid">101</span><br>
+            <b>Not:</b> Kendi verim.
+        </div>
+        
+        <br>
+        <button onclick="attack()">ID'yi Değiştir (Saldır)</button>
+        <p><small>Sunucu kontrol etmezse ID:102 verisi gelir.</small></p>
+    </div>
+
+    <div class="box green">
+        <h3>2. Yetki Matrisi</h3>
+        <p>Rolünü Seç:</p>
+        <select id="myRole">
+            <option value="user">Standart Kullanıcı</option>
+            <option value="admin">Yönetici (Admin)</option>
+        </select>
+        
+        <br><br>
+        <button onclick="checkDelete()">Veri Silmeyi Dene</button>
+        <p id="msg"></p>
+    </div>
+
+    <script>
+       
+        function attack() {
+            let nextId = 102; 
+            document.getElementById('pid').innerText = nextId;
+            
+            document.getElementById('data-screen').innerHTML = 
+                "<b>ID: 102 (BAŞKASI)</b><br>" + 
+                "<span style='color:red'>Gizli Şifre: 9876</span>";
+        }
+
+        function checkDelete() {
+            let role = document.getElementById('myRole').value;
+            let msg = document.getElementById('msg');
+
+            if (role === "admin") {
+                msg.innerText = "✅ Başarılı: Veri silindi.";
+                msg.style.color = "green";
+            } else {
+                msg.innerText = "❌ Hata: Yetkiniz yok!";
+                msg.style.color = "red";
+            }
+        }
+    </script>
+
+</body>
+</html>
