@@ -1,12 +1,22 @@
-from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError
+import subprocess
+import sys
 
-# Argon2 nesnesini oluşturuyoruz
-# Bu nesne otomatik olarak güvenli salt üretir ve hashleme yapar
+# Kütüphane yüklü mü kontrol et, değilse yükle
+try:
+    from argon2 import PasswordHasher
+    from argon2.exceptions import VerifyMismatchError
+except ImportError:
+    print("Argon2 kütüphanesi eksik, şu an yükleniyor... Lütfen bekleyin.")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "argon2-cffi"])
+    from argon2 import PasswordHasher
+    from argon2.exceptions import VerifyMismatchError
+    print("Yükleme tamamlandı!\n")
+
+# --- BURADAN SONRASI ESKİ KODUN ---
+
 ph = PasswordHasher()
 
 def kayit_ol(kullanici_adi, parola):
-    # Parolayı hashliyoruz (Salt otomatik olarak içine gömülür)
     hashli_parola = ph.hash(parola)
     print(f"\n[KAYIT] Kullanıcı: {kullanici_adi}")
     print(f"[HASH] Veritabanına kaydedilecek veri: {hashli_parola}")
@@ -14,7 +24,6 @@ def kayit_ol(kullanici_adi, parola):
 
 def giris_yap(kullanici_adi, girilen_parola, kaydedilmis_hash):
     try:
-        # Argon2, hash'in içindeki salt'ı okur ve doğrulamayı yapar
         ph.verify(kaydedilmis_hash, girilen_parola)
         print(f"\n[GİRİŞ] Kullanıcı '{kullanici_adi}' için giriş BAŞARILI!")
         return True
@@ -22,16 +31,8 @@ def giris_yap(kullanici_adi, girilen_parola, kaydedilmis_hash):
         print(f"\n[HATA] Kullanıcı '{kullanici_adi}' için hatalı parola!")
         return False
 
-# --- DEMO AKIŞI ---
-
-# 1. Kullanıcı oluşturma
+# Demo Akışı
 user_db = {}
 p_hash = kayit_ol("Ahmet", "cok_gizli_123")
 user_db["Ahmet"] = p_hash
-
-# 2. Giriş denemeleri
-# Doğru deneme
 giris_yap("Ahmet", "cok_gizli_123", user_db["Ahmet"])
-
-# Yanlış deneme (Rainbow table saldırısı yapsanız bile burayı geçemezsiniz)
-giris_yap("Ahmet", "yanlis_sifre", user_db["Ahmet"])
